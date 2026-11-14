@@ -1,10 +1,22 @@
+﻿# Why?
+
+Got tired of having to use an alternate version for MM support and how the import all animations option is not present in the regular one.
+
+Differences to main repo:
+
+- Majora's Mask supported (ty Yanis)
+- When in MM mode, an alternate decomp directory is used to not overwrite OoT's
+- Some default values have been changed to favour z64rom imports, such as the default scale set to 1.0, default decomp version set to Legacy, only Mesh and Collision checked in scene importer...
+- Checkbox to import all animations when importing skeletons
+- Much less invasive, everything is now organized in tabs!
+
+![alt-text](/images/cdi-great.gif)
+
 # Fast64
 
-This requires Blender 3.2+. Blender 4.0+ is recommended.
+This requires Blender 3.2+. Blender 3.6 is recommended.
 
-Forked from [kurethedead/fast64 on BitBucket](https://bitbucket.org/kurethedead/fast64/src).
-
-![alt-text](/images/mario_running.gif)
+Forked from [Yanis fork of Fast64 that includes MM](https://github.com/Yanis002/fast64/tree/mm_dev).
 
 This is a Blender plugin that allows one to export F3D display lists. It also has the ability to export assets for Super Mario 64 and Ocarina of Time decompilation projects. It supports custom color combiners / geometry modes / etc. It is also possible to use exported C code in homebrew applications.
 
