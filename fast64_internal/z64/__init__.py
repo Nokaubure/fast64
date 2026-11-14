@@ -1,3 +1,4 @@
+from .paths import get_decomp_path
 import bpy
 
 from ..game_data import game_data
@@ -131,7 +132,7 @@ class OOT_Properties(bpy.types.PropertyGroup):
             return f"extracted/{version if version != 'Custom' else self.version_custom}"
 
     def is_globalh_present(self):
-        decomp_path = Path(bpy.context.scene.ootDecompPath).resolve()
+        decomp_path = Path(bpy.path.abspath(get_decomp_path(bpy.context.scene))).resolve()
 
         if not decomp_path.exists():
             raise PluginError(f"ERROR: invalid decomp path ('{decomp_path}').")

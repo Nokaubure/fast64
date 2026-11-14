@@ -1,3 +1,4 @@
+from ..paths import get_decomp_path
 from bpy.types import Armature, Operator, Mesh
 from bpy.ops import object
 from bpy.utils import register_class, unregister_class
@@ -71,7 +72,7 @@ class OOT_ImportSkeleton(Operator):
 
         try:
             importSettings: OOTSkeletonImportSettings = context.scene.fast64.oot.skeletonImportSettings
-            decompPath = abspath(context.scene.ootDecompPath)
+            decompPath = abspath(get_decomp_path(context.scene))
 
             ootImportSkeletonC(decompPath, importSettings)
 

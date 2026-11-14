@@ -1,3 +1,4 @@
+from ..paths import get_decomp_path
 import mathutils, bpy, os
 from bpy.types import Scene, Operator, Armature
 from bpy.props import StringProperty, BoolProperty
@@ -83,7 +84,7 @@ def ootImportAnimationC(
     if settings.isLink:
         numLimbs = 21
         if not settings.isCustom:
-            basePath = bpy.path.abspath(bpy.context.scene.ootDecompPath)
+            basePath = bpy.path.abspath(get_decomp_path(bpy.context.scene))
             animFilepath = os.path.join(
                 basePath,
                 f"{bpy.context.scene.fast64.oot.get_extracted_path()}/assets/misc/link_animetion/link_animetion.c",

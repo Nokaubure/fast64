@@ -1,3 +1,4 @@
+from ...paths import get_decomp_path
 import mathutils
 import bpy
 import os
@@ -311,7 +312,7 @@ def ootConvertArmatureToC(
     writeCData(data, os.path.join(path, filename + ".h"), os.path.join(path, filename + ".c"))
 
     if not isCustomExport:
-        writeTextureArraysExisting(bpy.context.scene.ootDecompPath, overlayName, isLink, flipbookArrayIndex2D, fModel)
+        writeTextureArraysExisting(get_decomp_path(bpy.context.scene), overlayName, isLink, flipbookArrayIndex2D, fModel)
         addIncludeFiles(folderName, path, filename)
         if removeVanillaData:
             ootRemoveSkeleton(path, folderName, skeletonName)

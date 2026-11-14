@@ -1,3 +1,4 @@
+from .paths import get_decomp_path
 import bpy
 import math
 import os
@@ -517,9 +518,10 @@ def ootGetPath(exportPath, isCustomExport, subPath, folderName, makeIfNotExists,
     if isCustomExport:
         path = bpy.path.abspath(os.path.join(exportPath, (folderName if useFolderForCustom else "")))
     else:
-        if bpy.context.scene.ootDecompPath == "":
+        decomp_path = get_decomp_path(bpy.context.scene)
+        if decomp_path == "":
             raise PluginError("Decomp base path is empty.")
-        path = bpy.path.abspath(os.path.join(os.path.join(bpy.context.scene.ootDecompPath, subPath), folderName))
+        path = bpy.path.abspath(os.path.join(decomp_path, subPath, folderName))
 
     if not os.path.exists(path):
         if isCustomExport or makeIfNotExists:

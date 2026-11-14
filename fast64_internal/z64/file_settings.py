@@ -17,7 +17,8 @@ class OOT_FileSettingsPanel(Z64_Panel):
         col.scale_y = 1.1  # extra padding, makes it easier to see these main settings
 
         prop_split(col, context.scene, "ootBlenderScale", "Scene Scale")
-        prop_split(col, context.scene, "ootDecompPath", "Decomp Path")
+        path_property = "mmDecompPath" if context.scene.gameEditorMode == "MM" else "ootDecompPath"
+        prop_split(col, context.scene, path_property, "Decomp Path")
 
         if context.scene.gameEditorMode == "OOT":
             version = "oot_version"
@@ -50,6 +51,7 @@ def file_register():
 
     Scene.ootBlenderScale = FloatProperty(name="Blender To OOT Scale", default=1.0, update=on_update_render_settings)
     Scene.ootDecompPath = StringProperty(name="Decomp Folder", subtype="FILE_PATH")
+    Scene.mmDecompPath = StringProperty(name="MM Decomp Folder", subtype="DIR_PATH")
 
 
 def file_unregister():
@@ -58,3 +60,4 @@ def file_unregister():
 
     del Scene.ootBlenderScale
     del Scene.ootDecompPath
+    del Scene.mmDecompPath

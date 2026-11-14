@@ -1,3 +1,4 @@
+from ..paths import get_decomp_path
 import bpy
 import os
 import mathutils
@@ -93,7 +94,7 @@ def ootConvertMeshToC(
     writeCData(data, os.path.join(path, filename + ".h"), os.path.join(path, filename + ".c"))
 
     if not isCustomExport:
-        writeTextureArraysExisting(bpy.context.scene.ootDecompPath, overlayName, False, flipbookArrayIndex2D, fModel)
+        writeTextureArraysExisting(get_decomp_path(bpy.context.scene), overlayName, False, flipbookArrayIndex2D, fModel)
         addIncludeFiles(folderName, path, name)
         if removeVanillaData:
             headerPath = os.path.join(path, folderName + ".h")
@@ -120,7 +121,7 @@ class OOT_ImportDL(Operator):
             folderName = settings.folder
             importPath = abspath(settings.customPath)
             isCustomImport = settings.isCustom
-            basePath = abspath(context.scene.ootDecompPath) if not isCustomImport else os.path.dirname(importPath)
+            basePath = abspath(get_decomp_path(context.scene)) if not isCustomImport else os.path.dirname(importPath)
             removeDoubles = settings.removeDoubles
             importNormals = settings.importNormals
             drawLayer = settings.drawLayer

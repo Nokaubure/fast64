@@ -1,3 +1,4 @@
+from ..paths import get_decomp_path
 import os
 import re
 import bpy
@@ -102,7 +103,7 @@ def parseScene(
         else:
             sceneName = sceneNameFromID(option)
             subfolder = None
-        importPath = bpy.path.abspath(bpy.context.scene.ootDecompPath)
+        importPath = bpy.path.abspath(get_decomp_path(bpy.context.scene))
 
 
     importSubdir = ""
@@ -129,7 +130,7 @@ def parseScene(
         bpy.context.mode = "OBJECT"
 
     # set scene default registers (see sDefaultDisplayList)
-    f3dContext = OOTF3DContext(get_F3D_GBI(), [], bpy.path.abspath(bpy.context.scene.ootDecompPath))
+    f3dContext = OOTF3DContext(get_F3D_GBI(), [], bpy.path.abspath(get_decomp_path(bpy.context.scene)))
     f3dContext.mat().prim_color = (0.5, 0.5, 0.5, 0.5)
     f3dContext.mat().env_color = (0.5, 0.5, 0.5, 0.5)
 

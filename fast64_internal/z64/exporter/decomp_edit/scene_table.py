@@ -1,3 +1,4 @@
+from ...paths import get_decomp_path
 import os
 import bpy
 
@@ -289,7 +290,7 @@ class SceneTableUtility:
             scene_name = f"{scene_name}_scene"
 
         scene_table = SceneTable.new(
-            os.path.join(bpy.path.abspath(bpy.context.scene.ootDecompPath), "include/tables/scene_table.h")
+            os.path.join(bpy.path.abspath(get_decomp_path(bpy.context.scene)), "include/tables/scene_table.h")
         )
 
         spec_dict = {entry.spec_name: entry for entry in scene_table.get_entries_flattened()}

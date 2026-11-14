@@ -1,3 +1,4 @@
+from ..paths import get_decomp_path
 import bpy
 import os
 
@@ -122,7 +123,7 @@ class OOT_ClearBootupScene(Operator):
     bl_options = {"REGISTER", "UNDO", "PRESET"}
 
     def execute(self, context):
-        Config.clearBootupScene(os.path.join(abspath(context.scene.ootDecompPath), "include/config/config_debug.h"))
+        Config.clearBootupScene(os.path.join(abspath(get_decomp_path(context.scene)), "include/config/config_debug.h"))
         self.report({"INFO"}, "Success!")
         return {"FINISHED"}
 
@@ -199,7 +200,7 @@ class OOT_ExportScene(Operator):
                     levelName = sceneNameFromID(option)
                     customSubPath = None
                 isCustomExport = False
-                exportPath = bpy.path.abspath(context.scene.ootDecompPath)
+                exportPath = bpy.path.abspath(get_decomp_path(context.scene))
 
             exportInfo = ExportInfo(
                 isCustomExport,
@@ -267,7 +268,7 @@ class OOT_RemoveScene(Operator):
             subfolder = None
 
         # the scene files will be removed from `assets` if it's present
-        Files.remove_scene(RemoveInfo(abspath(context.scene.ootDecompPath), subfolder, levelName))
+        Files.remove_scene(RemoveInfo(abspath(get_decomp_path(context.scene)), subfolder, levelName))
 
         self.report({"INFO"}, "Success!")
         return {"FINISHED"}
