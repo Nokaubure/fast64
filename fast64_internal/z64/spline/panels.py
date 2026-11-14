@@ -10,6 +10,7 @@ class OOTSplinePanel(Panel):
     bl_space_type = "PROPERTIES"
     bl_region_type = "WINDOW"
     bl_context = "object"
+    bl_parent_id = "OBJECT_PT_fast64"
     bl_options = {"HIDE_HEADER"}
 
     @classmethod

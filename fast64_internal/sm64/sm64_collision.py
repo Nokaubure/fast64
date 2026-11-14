@@ -207,6 +207,7 @@ class SM64CollisionPanel(bpy.types.Panel):
     bl_space_type = "PROPERTIES"
     bl_region_type = "WINDOW"
     bl_context = "material"
+    bl_parent_id = "MATERIAL_PT_fast64"
     bl_options = {"HIDE_HEADER"}
 
     @classmethod

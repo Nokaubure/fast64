@@ -1,4 +1,5 @@
 import bpy
+from .fast64_internal.panels import properties_panels_register, properties_panels_unregister
 from .fast64_internal.game_data import game_data
 
 from bpy.utils import register_class, unregister_class
@@ -438,6 +439,7 @@ def register():
     addon_updater_ops.register(bl_info)
 
     utility_anim_register()
+    properties_panels_register()
     mat_register()
     render_engine_register()
     bsdf_conv_register()
@@ -498,6 +500,7 @@ def unregister():
     bsdf_conv_unregister()
     bsdf_conv_panel_unregsiter()
     render_engine_unregister()
+    properties_panels_unregister()
 
     del bpy.types.Scene.fullTraceback
     del bpy.types.Scene.ignoreTextureRestrictions

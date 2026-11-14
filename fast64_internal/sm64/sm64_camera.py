@@ -48,6 +48,7 @@ class CameraSettingsPanel(bpy.types.Panel):
     bl_space_type = "PROPERTIES"
     bl_region_type = "WINDOW"
     bl_context = "data"
+    bl_parent_id = "DATA_PT_fast64_camera"
     bl_options = {"HIDE_HEADER"}
 
     @classmethod

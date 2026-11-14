@@ -173,6 +173,7 @@ class GeolayoutBonePanel(Panel):
     bl_space_type = "PROPERTIES"
     bl_region_type = "WINDOW"
     bl_context = "bone"
+    bl_parent_id = "BONE_PT_fast64"
     bl_options = {"HIDE_HEADER"}
 
     @classmethod
@@ -189,6 +190,7 @@ class GeolayoutArmaturePanel(Panel):
     bl_space_type = "PROPERTIES"
     bl_region_type = "WINDOW"
     bl_context = "object"
+    bl_parent_id = "OBJECT_PT_fast64"
     bl_options = {"HIDE_HEADER"}
 
     @classmethod
@@ -223,6 +225,7 @@ class GeolayoutObjectPanel(Panel):
     bl_space_type = "PROPERTIES"
     bl_region_type = "WINDOW"
     bl_context = "object"
+    bl_parent_id = "OBJECT_PT_fast64"
     bl_options = {"HIDE_HEADER"}
 
     @classmethod
