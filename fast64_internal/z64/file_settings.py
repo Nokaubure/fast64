@@ -48,7 +48,7 @@ def file_register():
     for cls in oot_classes:
         register_class(cls)
 
-    Scene.ootBlenderScale = FloatProperty(name="Blender To OOT Scale", default=10, update=on_update_render_settings)
+    Scene.ootBlenderScale = FloatProperty(name="Blender To OOT Scale", default=1.0, update=on_update_render_settings)
     Scene.ootDecompPath = StringProperty(name="Decomp Folder", subtype="FILE_PATH")
 
 

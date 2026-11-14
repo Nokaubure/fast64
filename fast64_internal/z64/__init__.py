@@ -114,8 +114,8 @@ class OOT_Properties(bpy.types.PropertyGroup):
     animExportSettings: bpy.props.PointerProperty(type=OOTAnimExportSettingsProperty)
     animImportSettings: bpy.props.PointerProperty(type=OOTAnimImportSettingsProperty)
     collisionExportSettings: bpy.props.PointerProperty(type=OOTCollisionExportSettings)
-    oot_version: bpy.props.EnumProperty(name="OoT Version", items=oot_versions_items, default="gc-eu-mq-dbg")
-    mm_version: bpy.props.EnumProperty(name="OoT Version", items=mm_versions_items, default="n64-us")
+    oot_version: bpy.props.EnumProperty(name="OoT Version", items=oot_versions_items, default="legacy")
+    mm_version: bpy.props.EnumProperty(name="OoT Version", items=mm_versions_items, default="legacy")
     version_custom: bpy.props.StringProperty(name="Custom Version")
     mm_features: bpy.props.BoolProperty(name="Enable MM Features", default=False)
 
