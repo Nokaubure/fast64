@@ -1,16 +1,34 @@
 from pathlib import Path
-import bpy, random, string, os, math, traceback, re, os, mathutils, ast, operator
+import bpy, random, string, os, math, traceback, re, os, mathutils, ast, operator, inspect
 from math import pi, ceil, degrees, radians, copysign
 from mathutils import *
 from .utility_anim import *
-from typing import Callable, Iterable, Any, Optional, Tuple, TypeVar, Union
+from typing import Callable, Iterable, Any, Optional, Tuple, TypeVar, Union, TYPE_CHECKING
 from bpy.types import UILayout, Scene, World
+
+if TYPE_CHECKING:
+    from .f3d.f3d_material import F3DMaterialProperty
 
 CollectionProperty = Any  # collection prop as defined by using bpy.props.CollectionProperty
 
 
 class PluginError(Exception):
-    pass
+    # arguments for exception processing
+    exc_halt = "exc_halt"
+    exc_warn = "exc_warn"
+
+    """
+    because exceptions generally go through multiple funcs
+    and layers, the easiest way to check if we have an exception
+    of a certain type is to check for our input string
+    """
+
+    @classmethod
+    def check_exc_warn(self, exc):
+        for arg in exc.args:
+            if type(arg) is str and self.exc_warn in arg:
+                return True
+        return False
 
 
 class VertexWeightError(PluginError):
@@ -424,7 +442,7 @@ def getPathAndLevel(is_custom_export, custom_export_path, custom_level_name, lev
         export_path = bpy.path.abspath(custom_export_path)
         level_name = custom_level_name
     else:
-        export_path = bpy.path.abspath(bpy.context.scene.fast64.sm64.decomp_path)
+        export_path = str(bpy.context.scene.fast64.sm64.abs_decomp_path)
         if level_enum == "Custom":
             level_name = custom_level_name
         else:
@@ -715,7 +733,7 @@ def getExportDir(customExport, dirPath, headerType, levelName, texDir, dirName):
     return dirPath, texDir
 
 
-def overwriteData(headerRegex, name, value, filePath, writeNewBeforeString, isFunction):
+def overwriteData(headerRegex, name, value, filePath, writeNewBeforeString, isFunction, post_regex=""):
     if os.path.exists(filePath):
         dataFile = open(filePath, "r")
         data = dataFile.read()
@@ -724,7 +742,8 @@ def overwriteData(headerRegex, name, value, filePath, writeNewBeforeString, isFu
         matchResult = re.search(
             headerRegex
             + re.escape(name)
-            + ("\s*\((((?!\)).)*)\)\s*\{(((?!\}).)*)\}" if isFunction else "\[\]\s*=\s*\{(((?!;).)*);"),
+            + ("\s*\((((?!\)).)*)\)\s*\{(((?!\}).)*)\}" if isFunction else "\[\]\s*=\s*\{(((?!;).)*);")
+            + post_regex,
             data,
             re.DOTALL,
         )
@@ -1638,7 +1657,7 @@ def get_blender_to_game_scale(context):
     match context.scene.gameEditorMode:
         case "SM64":
             return context.scene.fast64.sm64.blender_to_sm64_scale
-        case "OOT":
+        case "OOT" | "MM":
             return context.scene.ootBlenderScale
         case "F3D":
             # TODO: (V5) create F3D game editor mode, utilize that scale
@@ -1662,32 +1681,39 @@ def lightDataToObj(lightData):
     for obj in bpy.context.scene.objects:
         if obj.data == lightData:
             return obj
-    raise PluginError("A material is referencing a light that is no longer in the scene (i.e. has been deleted).")
+    raise PluginError(
+        f'Referencing a light ("{lightData.name}") that is no longer in the scene (i.e. has been deleted).'
+    )
 
 
-def ootGetSceneOrRoomHeader(parent, idx, isRoom):
+def ootGetSceneOrRoomHeader(parent: bpy.types.Object, idx: int, isRoom: bool):
+    from .game_data import game_data  # circular import fix
+
     # This should be in oot_utility.py, but it is needed in f3d_material.py
     # which creates a circular import. The real problem is that the F3D render
     # settings stuff should be in a place which can import both SM64 and OoT
     # code without circular dependencies.
     if idx < 0:
         raise PluginError("Alternate scene/room header index too low: " + str(idx))
+
     target = "Room" if isRoom else "Scene"
     altHeaders = getattr(parent, "ootAlternate" + target + "Headers")
+
     if idx == 0:
         return getattr(parent, "oot" + target + "Header")
-    elif 1 <= idx <= 3:
-        if idx == 1:
-            ret = altHeaders.childNightHeader
-        elif idx == 2:
-            ret = altHeaders.adultDayHeader
-        else:
-            ret = altHeaders.adultNightHeader
-        return None if ret.usePreviousHeader else ret
-    else:
-        if idx - 4 >= len(altHeaders.cutsceneHeaders):
-            return None
-        return altHeaders.cutsceneHeaders[idx - 4]
+    elif game_data.z64.is_oot():
+        if 1 <= idx <= (game_data.z64.cs_index_start - 1):
+            if idx == 1:
+                ret = altHeaders.childNightHeader
+            elif idx == 2:
+                ret = altHeaders.adultDayHeader
+            else:
+                ret = altHeaders.adultNightHeader
+            return None if ret.usePreviousHeader else ret
+
+    if idx - game_data.z64.cs_index_start >= len(altHeaders.cutsceneHeaders):
+        return None
+    return altHeaders.cutsceneHeaders[idx - game_data.z64.cs_index_start]
 
 
 def ootGetBaseOrCustomLight(prop, idx, toExport: bool, errIfMissing: bool):
@@ -1699,14 +1725,17 @@ def ootGetBaseOrCustomLight(prop, idx, toExport: bool, errIfMissing: bool):
     col = getattr(prop, "diffuse" + str(idx))
     dir = (mathutils.Vector((1.0, -1.0, 1.0)) * (1.0 if idx == 0 else -1.0)).normalized()
     if getattr(prop, "useCustomDiffuse" + str(idx)):
-        light = getattr(prop, "diffuse" + str(idx) + "Custom")
-        if light is None:
-            if errIfMissing:
-                raise PluginError("Error: Diffuse " + str(idx) + " light object not set in a scene lighting property.")
-        else:
-            col = tuple(c for c in light.color) + (1.0,)
-            lightObj = lightDataToObj(light)
-            dir = getObjDirectionVec(lightObj, toExport)
+        try:
+            light = getattr(prop, "diffuse" + str(idx) + "Custom")
+            if light is None:
+                if errIfMissing:
+                    raise PluginError("Light object not set in a scene lighting property.")
+            else:
+                col = tuple(c for c in light.color) + (1.0,)
+                lightObj = lightDataToObj(light)
+                dir = getObjDirectionVec(lightObj, toExport)
+        except Exception as exc:
+            raise PluginError(f"In custom diffuse {idx}: {exc}") from exc
     col = mathutils.Vector(tuple(c for c in col))
     if toExport:
         col, dir = exportColor(col), normToSigned8Vector(dir)
@@ -1909,3 +1938,32 @@ def set_if_different(owner: object, prop: str, value):
 def set_prop_if_in_data(owner: object, prop_name: str, data: dict, data_name: str):
     if data_name in data:
         set_if_different(owner, prop_name, data[data_name])
+
+
+def get_prop_annotations(cls):
+    prop_annotations = getattr(cls, "__annotations__", None)
+
+    if prop_annotations is None:
+        setattr(cls, "__annotations__", dict())
+        prop_annotations = getattr(cls, "__annotations__")
+
+    return prop_annotations
+
+
+def wrap_func_with_error_message(error_message: Callable):
+    """Decorator for big, reused functions that need generic info in errors, such as material exports."""
+
+    def decorator(func):
+        def wrapper(*args, **kwargs):
+            # Get the argument names and values (positional and keyword)
+            sig = inspect.signature(func)
+            bound_args = sig.bind(*args, **kwargs)
+            bound_args.apply_defaults()
+            try:
+                return func(*args, **kwargs)
+            except Exception as exc:
+                raise PluginError(f"{error_message(bound_args.arguments)} {exc}") from exc
+
+        return wrapper
+
+    return decorator
