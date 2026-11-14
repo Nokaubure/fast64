@@ -21,6 +21,11 @@ from ...utility import (
 )
 
 
+def ootGetAnimNames(skeleton_data):
+    # Extract AnimationHeader names from the skeleton
+    return re.findall(r"AnimationHeader\s+(\w+)", skeleton_data)
+
+
 def ootGetSkeleton(skeletonData, skeletonName, continueOnError):
     # TODO: Does this handle non flex skeleton?
     matchResult = re.search(

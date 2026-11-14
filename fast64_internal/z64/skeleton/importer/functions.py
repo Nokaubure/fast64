@@ -3,14 +3,14 @@ from typing import List
 import mathutils, bpy, math
 from ....f3d.f3d_gbi import F3D, get_F3D_GBI
 from ....f3d.f3d_parser import getImportData, parseF3D, parseMatrices
-from ....utility import hexOrDecInt, applyRotation, PluginError
+from ....utility import hexOrDecInt, applyRotation, PluginError, selectSingleObject
 from ...f3d_writer import ootReadActorScale
 from ...model_classes import OOTF3DContext, ootGetIncludedAssetData
 from ...utility import OOTEnum, ootGetObjectPath, getOOTScale, ootGetObjectHeaderPath, ootGetEnums, ootStripComments
 from ...texture_array import ootReadTextureArrays
 from ....game_data import game_data
 from ..properties import OOTSkeletonImportSettings
-from ..utility import ootGetLimb, ootGetLimbs, ootGetSkeleton, applySkeletonRestPose
+from ..utility import ootGetLimb, ootGetLimbs, ootGetSkeleton, applySkeletonRestPose, ootGetAnimNames
 
 
 class OOTDLEntry:
@@ -333,3 +333,12 @@ def ootImportSkeletonC(basePath: str, importSettings: OOTSkeletonImportSettings)
         applySkeletonRestPose(restPoseData, armatureObj)
         if isLOD:
             applySkeletonRestPose(restPoseData, LODArmatureObj)
+
+    if importSettings.importAnimations:
+        from ...tools.quick_import import quick_import_exec
+
+        if armatureObj is not None:
+            selectSingleObject(armatureObj)
+
+        for animation_name in dict.fromkeys(ootGetAnimNames(skeletonData)):
+            quick_import_exec(bpy.context, animation_name)
